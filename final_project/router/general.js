@@ -50,16 +50,39 @@ public_users.get('/author/:author',function (req, res) {
         authorBooks.push(book);
     }
   }
-  return res.status(200).json({
-    message: "Request was successful",
-    data: authorBooks
-  });
+  if(authorBooks.length) {
+    return res.status(200).json({
+        message: "Request was successful",
+        data: authorBooks
+    });
+  } else {
+    return res.status(404).json({
+      message: "Nothing found for that author",
+    });
+  }
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const title = req.params.title;
+    let foundBooks;
+    for(const key in books) {
+      const book = books[key];
+      if(book.title === title) {
+          foundBooks = book;
+          break;
+      }
+    }
+    if(foundBooks !== undefined) {
+        return res.status(200).json({
+            message: "Request was successful",
+            data: foundBooks
+        });
+    } else {
+        return res.status(404).json({
+            message: "Nothing found with this title",
+        });
+    }
 });
 
 //  Get book review
