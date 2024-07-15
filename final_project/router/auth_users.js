@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
 const regd_users = express.Router();
 
+const MY_SECRET_KEY = "My_Strong_Secret_Key";
+
 let users = [];
 
 const isValid = (username)=>{ 
@@ -32,7 +34,7 @@ regd_users.post("/login", (req,res) => {
   if (authenticatedUser(username, password)) {
     let accessToken = jwt.sign({
       data: password
-    }, 'access', { expiresIn: 60 * 60 });
+    }, MY_SECRET_KEY, { expiresIn: 60 * 60 });
 
     req.session.authorization = {
       accessToken, username
@@ -45,8 +47,27 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const isbn = parseInt(req.params.isbn);
+    if(!isNaN(isbn)) {
+        const book = books[isbn];
+        const username = req.session.authorization["username"];
+        if(book) {
+            book.reviews[username] = req.body.review;
+            books[isbn] = book;
+            return res.status(200).json({
+                message: "Review updated successfuly",
+                data: book
+            });
+        } else {
+            return res.status(404).json({
+                message: "Book not found"
+            });
+        }
+    } else {
+        return res.status(422).json({
+            message: "ISBN must be a number"
+        });
+    }
 });
 
 module.exports.authenticated = regd_users;
