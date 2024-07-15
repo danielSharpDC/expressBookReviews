@@ -70,6 +70,31 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     }
 });
 
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = parseInt(req.params.isbn);
+    if(!isNaN(isbn)) {
+        const book = books[isbn];
+        const username = req.session.authorization["username"];
+        if(book) {
+            delete book.reviews[username];
+            books[isbn] = book;
+            return res.status(200).json({
+                message: "Review deleted successfuly",
+                data: book
+            });
+        } else {
+            return res.status(404).json({
+                message: "Book not found"
+            });
+        }
+    } else {
+        return res.status(422).json({
+            message: "ISBN must be a number"
+        });
+    }
+});
+
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
